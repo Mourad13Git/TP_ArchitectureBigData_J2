@@ -1,0 +1,6 @@
+pandas>=2.0
+pyarrow>=14.0
+pyyaml>=6.0
+pymongo>=4.6
+requests>=2.31
+apache-airflow>=2.8.0

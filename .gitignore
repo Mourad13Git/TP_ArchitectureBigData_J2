@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Donnees volumineuses (KBO full dump local)
+KboOpenData_*/
+
+# Bronze genere localement
+ingestion_bronze/data/bronze/
+ingestion_bronze/airflow_home/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

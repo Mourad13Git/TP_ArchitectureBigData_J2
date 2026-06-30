@@ -1,0 +1,43 @@
+# Configuration — Ingestion Bronze (Jour 2 TP)
+# Chemins cluster : remplacer par /home/jovyan/work/... ou /data/...
+
+kbo:
+  source_dir: "../KboOpenData_0404_2026_06_28_Full"
+  tables:
+    - enterprise
+    - denomination
+    - address
+    - activity
+    - contact
+    - establishment
+    - branch
+    - code
+  chunk_size: 500_000
+
+bronze:
+  base_path: "data/bronze"
+  hdfs_prefix: "/data/bronze"
+
+mongodb:
+  uri: "mongodb://localhost:27017"
+  database: "bce_ingestion"
+  enterprises_collection: "enterprises"
+  state_collection: "ingestion_state"
+
+nbb:
+  base_url: "https://consult.cbso.nbb.be"
+  api_deposits: "https://consult.cbso.nbb.be/api/enterprise/{bce}/deposits"
+  bronze_pdfs: "nbb/pdfs"
+  bronze_csvs: "nbb/csvs"
+  min_year: 2021
+
+ejustice:
+  base_url: "https://www.ejustice.just.fgov.be/cgi_tsv/list.pl"
+
+statuts:
+  base_url: "https://statuts.notaire.be/stapor_v1/enterprise/{bce}/statutes"
+
+ingestion:
+  # Mettre 0 pour ingestion complète (~2M entreprises)
+  demo_limit_enterprises: 0
+  batch_size_mongo: 10_000
