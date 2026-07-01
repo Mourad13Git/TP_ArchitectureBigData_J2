@@ -11,6 +11,7 @@ KboOpenData_*/
 # Bronze genere localement
 ingestion_bronze/data/bronze/
 ingestion_bronze/airflow_home/
+ingestion_bronze/airflow_logs/
 
 # IDE / OS
 .idea/

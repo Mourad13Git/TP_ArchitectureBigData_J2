@@ -64,14 +64,27 @@ python scripts/run_bronze_ingestion.py --step all --demo 5000
 python scripts/run_bronze_ingestion.py --step all
 ```
 
-### Airflow
+### Airflow (interface web)
+
+Sur Windows, Airflow tourne via **Docker** :
+
+```bash
+cd ingestion_bronze
+docker compose -f docker-compose.airflow.yml up -d
+# ou : powershell -File scripts/start_airflow.ps1
+```
+
+Ouvrir **http://localhost:8081** (port 8081 car 8080 est souvent occupe).
+
+- **Login** : `admin` / `admin`
+- **DAG** : `bce_ingestion_bronze_kbo`
+
+Arreter : `docker compose -f docker-compose.airflow.yml down`
 
 ```bash
 export AIRFLOW_HOME=./airflow_home
 airflow dags test bce_ingestion_bronze_kbo 2026-06-29
 ```
-
-DAG : `dags/bce_ingestion_bronze_kbo_dag.py`
 
 ## Branche Git (soumission)
 

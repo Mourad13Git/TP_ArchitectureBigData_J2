@@ -13,7 +13,7 @@ import pyarrow.parquet as pq
 from src.config import load_config
 from src.db.mongodb import ArtifactStatus, IngestionState, MongoClientFactory, StateDB
 from src.db.file_state import FileStateDB
-from scripts.run_bronze_ingestion import get_stores
+from src.runtime import get_stores
 
 
 def test_config() -> None:

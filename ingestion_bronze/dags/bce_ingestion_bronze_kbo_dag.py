@@ -23,7 +23,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.config import load_config
-from src.db.mongodb import EnterpriseRepository, MongoClientFactory, StateDB
+from src.runtime import get_stores
 from src.kbo_ingestion import ingest_kbo_table_to_bronze, read_kbo_meta, seed_enterprises_mongodb
 
 default_args = {
@@ -42,10 +42,12 @@ def task_read_meta(**_):
 
 def task_ingest_kbo_tables(snapshot_id: str, **_):
     cfg = load_config()
-    factory = MongoClientFactory(cfg["mongodb"]["uri"], cfg["mongodb"]["database"])
-    state_db = StateDB(factory.db[cfg["mongodb"]["state_collection"]])
+    state_db, _, backend = get_stores(cfg, on_warn=print)
+    print(f"Backend State DB: {backend}")
     source_dir = Path(cfg["kbo"]["source_dir"])
     bronze_dir = Path(cfg["bronze"]["base_path"])
+    if not source_dir.exists():
+        raise FileNotFoundError(f"KBO source introuvable dans le conteneur: {source_dir}")
 
     for table in cfg["kbo"]["tables"]:
         ingest_kbo_table_to_bronze(
@@ -56,28 +58,29 @@ def task_ingest_kbo_tables(snapshot_id: str, **_):
             snapshot_id=snapshot_id,
             state_db=state_db,
             chunk_size=cfg["kbo"]["chunk_size"],
+            on_progress=print,
         )
 
 
 def task_seed_mongodb(**_):
     cfg = load_config()
-    factory = MongoClientFactory(cfg["mongodb"]["uri"], cfg["mongodb"]["database"])
-    repo = EnterpriseRepository(factory.db[cfg["mongodb"]["enterprises_collection"]])
+    _, enterprise_repo, backend = get_stores(cfg, on_warn=print)
+    print(f"Backend catalogue: {backend}")
     seed_enterprises_mongodb(
         source_dir=Path(cfg["kbo"]["source_dir"]),
-        enterprise_repo=repo,
+        enterprise_repo=enterprise_repo,
         batch_size=cfg["ingestion"]["batch_size_mongo"],
         demo_limit=cfg["ingestion"].get("demo_limit_enterprises", 0),
+        on_progress=print,
     )
 
 
 def task_nbb_delta_placeholder(**_):
-    """Jour 2-3 : lire entreprises MongoDB, vérifier State DB, télécharger NBB."""
+    """Jour 2-3 : lire entreprises MongoDB, verifier State DB, telecharger NBB."""
     cfg = load_config()
-    factory = MongoClientFactory(cfg["mongodb"]["uri"], cfg["mongodb"]["database"])
-    state_db = StateDB(factory.db[cfg["mongodb"]["state_collection"]])
+    state_db, _, _ = get_stores(cfg, on_warn=print)
     pending = state_db.list_pending("nbb", limit=10)
-    print(f"NBB pending (placeholder): {len(pending)} — implémentation jour 2-3")
+    print(f"NBB pending (placeholder): {len(pending)}")
 
 
 with DAG(

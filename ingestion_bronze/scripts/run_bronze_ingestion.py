@@ -17,31 +17,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src.config import load_config
-from src.db.file_enterprises import FileEnterpriseRepository
-from src.db.file_state import FileStateDB
-from src.db.mongodb import EnterpriseRepository, MongoClientFactory, StateDB
+from src.runtime import get_stores
 from src.kbo_ingestion import ingest_kbo_table_to_bronze, read_kbo_meta, seed_enterprises_mongodb
-
-
-def get_stores(cfg: dict):
-    """MongoDB si disponible, sinon fallback fichiers locaux."""
-    try:
-        factory = MongoClientFactory(cfg["mongodb"]["uri"], cfg["mongodb"]["database"])
-        factory.client.admin.command("ping")
-        db = factory.db
-        return (
-            StateDB(db[cfg["mongodb"]["state_collection"]]),
-            EnterpriseRepository(db[cfg["mongodb"]["enterprises_collection"]]),
-            "mongodb",
-        )
-    except Exception as e:
-        log(f"[WARN] MongoDB indisponible - fallback fichiers locaux")
-        base = Path(cfg["bronze"]["base_path"])
-        return (
-            FileStateDB(base / "_meta" / "ingestion_state.json"),
-            FileEnterpriseRepository(base / "_meta" / "enterprises.json"),
-            "file",
-        )
 
 
 def log(msg: str) -> None:
@@ -60,7 +37,7 @@ def main() -> None:
     cfg = load_config(args.config)
     demo = args.demo or cfg["ingestion"].get("demo_limit_enterprises", 0)
 
-    state_db, enterprise_repo, backend = get_stores(cfg)
+    state_db, enterprise_repo, backend = get_stores(cfg, on_warn=log)
     log(f"Backend catalogue/state : {backend}")
 
     source_dir = Path(cfg["kbo"]["source_dir"])
