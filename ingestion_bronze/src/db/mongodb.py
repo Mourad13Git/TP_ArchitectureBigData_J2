@@ -13,6 +13,7 @@ from pymongo.database import Database
 
 class ArtifactStatus(str, Enum):
     PENDING = "pending"
+    IN_PROGRESS = "in_progress"
     DONE = "done"
     ERROR = "error"
 
@@ -113,6 +114,12 @@ class StateDB:
         state.updated_at = datetime.now(timezone.utc)
         self.upsert(state)
 
+    def mark_in_progress(self, state: IngestionState) -> None:
+        state.status = ArtifactStatus.IN_PROGRESS
+        state.error_message = None
+        state.updated_at = datetime.now(timezone.utc)
+        self.upsert(state)
+
     def list_pending(self, source: str, limit: int = 100) -> list[dict]:
         return list(
             self.col.find({"source": source, "status": ArtifactStatus.PENDING.value}).limit(limit)
@@ -176,3 +183,66 @@ class EnterpriseRepository:
 
     def get_sample(self, n: int = 5) -> list[dict]:
         return list(self.col.find().limit(n))
+
+
+class EnterpriseDocumentRepository:
+    """Repository generique pour enterprise_finale / enterprise_silver."""
+
+    def __init__(self, collection: Collection, id_field: str = "EnterpriseNumber"):
+        self.col = collection
+        self.id_field = id_field
+        self._ensure_indexes()
+
+    def _ensure_indexes(self) -> None:
+        self.col.create_index(self.id_field, unique=True)
+        self.col.create_index("Status")
+        self.col.create_index("JuridicalForm")
+        self.col.create_index("activities.NaceCode")
+
+    def count(self) -> int:
+        return self.col.count_documents({})
+
+    def bulk_upsert(self, documents: list[dict]) -> int:
+        if not documents:
+            return 0
+        ops = []
+        for doc in documents:
+            payload = {k: v for k, v in doc.items() if k not in ("_id", "created_at")}
+            ops.append(
+                UpdateOne(
+                    {self.id_field: doc[self.id_field]},
+                    {"$set": payload, "$setOnInsert": {"created_at": datetime.now(timezone.utc)}},
+                    upsert=True,
+                )
+            )
+        result = self.col.bulk_write(ops, ordered=False)
+        return result.upserted_count + result.modified_count
+
+    def iter_documents(self, batch_size: int = 5_000, limit: int | None = None) -> Iterator[list[dict]]:
+        cursor = self.col.find({}, {"_id": 0}).batch_size(batch_size)
+        batch: list[dict] = []
+        n = 0
+        for doc in cursor:
+            batch.append(doc)
+            n += 1
+            if len(batch) >= batch_size:
+                yield batch
+                batch = []
+            if limit and n >= limit:
+                break
+        if batch:
+            yield batch
+
+    def find_hotellerie_candidates(self, nace_codes: list[str], excluded_forms: list[str]) -> Iterator[dict]:
+        query = {
+            "Status": "AC",
+            "TypeOfEnterprise": "2",
+            "JuridicalForm": {"$nin": excluded_forms},
+            "activities": {
+                "$elemMatch": {
+                    "Classification": "MAIN",
+                    "NaceCode": {"$in": nace_codes},
+                }
+            },
+        }
+        yield from self.col.find(query, {"_id": 0, "EnterpriseNumber": 1})

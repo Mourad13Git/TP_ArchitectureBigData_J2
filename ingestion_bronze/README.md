@@ -97,6 +97,42 @@ git push -u origin INGESTION-BRONZE
 
 > La branche `main` ne contiendra que la dernière version stable en fin de TP.
 
+## Jour 2 — Silver + Scraping Hotellerie
+
+**Prérequis :** MongoDB local (`mongodb://localhost:27017`) + bronze KBO déjà ingéré.
+
+```bash
+cd ingestion_bronze
+
+# Tests unitaires Silver
+python scripts/test_silver_pipeline.py
+python scripts/run_notebook_j2_silver.py   # execute le notebook hors Jupyter
+
+# Generer le notebook
+python build_j2_silver_notebook.py
+
+# Pipeline complet (démo 5 000 entreprises)
+python scripts/run_silver_pipeline.py --step all --demo 5000 --limit 20
+
+# Étapes séparées
+python scripts/run_silver_pipeline.py --step finale          # enterprise_finale
+python scripts/run_silver_pipeline.py --step silver          # enterprise_silver
+python scripts/run_silver_pipeline.py --step hotellerie    # filtre -> StateDB pending
+python scripts/run_silver_pipeline.py --step nbb --limit 50  # scraping NBB 2021+
+```
+
+### Collections MongoDB créées
+
+| Collection | Rôle |
+|---|---|
+| `enterprise_finale` | Bronze enrichi (jointures KBO, intact pour rejeu Silver) |
+| `enterprise_silver` | Dates normalisées, activités dédupliquées, labels FR |
+| `ingestion_state` | `pending` / `in_progress` / `done` pour le scraping NBB hôtellerie |
+
+### API NBB CBSO
+
+L'API `consult.cbso.nbb.be` peut retourner **403** hors cluster Jupyter. Le pipeline marque alors l'entreprise en `error` dans la StateDB — relancer depuis le cluster pour télécharger les CSV.
+
 ## Jours 2-3 (à venir)
 
 - DAG NBB : lire `enterprises` depuis MongoDB → delta State DB → PDF/CSV bronze

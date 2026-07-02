@@ -23,13 +23,58 @@ mongodb:
   database: "bce_ingestion"
   enterprises_collection: "enterprises"
   state_collection: "ingestion_state"
+  finale_collection: "enterprise_finale"
+  silver_collection: "enterprise_silver"
+
+silver:
+  batch_size: 5_000
+
+hotellerie:
+  nace_codes:
+    - "55100"
+    - "55201"
+    - "55202"
+    - "55203"
+    - "55204"
+    - "55209"
+    - "55300"
+    - "55400"
+    - "55900"
+  excluded_juridical_forms:
+    - "110"
+    - "114"
+    - "116"
+    - "117"
+    - "301"
+    - "302"
+    - "303"
+    - "310"
+    - "320"
+    - "330"
+    - "340"
+    - "350"
+    - "400"
+    - "411"
+    - "412"
+    - "413"
+    - "414"
+    - "415"
+    - "416"
+    - "417"
+    - "418"
+    - "419"
+    - "420"
 
 nbb:
   base_url: "https://consult.cbso.nbb.be"
+  api_filings: "https://consult.cbso.nbb.be/api/enterprises/{bce}/filings"
+  api_filing_document: "https://consult.cbso.nbb.be/api/filings/{reference}/document"
   api_deposits: "https://consult.cbso.nbb.be/api/enterprise/{bce}/deposits"
   bronze_pdfs: "nbb/pdfs"
   bronze_csvs: "nbb/csvs"
   min_year: 2021
+  request_delay_sec: 0.5
+  max_retries_429: 5
 
 ejustice:
   base_url: "https://www.ejustice.just.fgov.be/cgi_tsv/list.pl"
