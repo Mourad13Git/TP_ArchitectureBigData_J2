@@ -13,7 +13,12 @@ ingestion_bronze/data/bronze/
 ingestion_bronze/airflow_home/
 ingestion_bronze/airflow_logs/
 
-# IDE / OS
+# Frontend / Node
+frontend/node_modules/
+frontend/dist/
+
+# API venv
+api/.venv/
 .idea/
 .vscode/
 .DS_Store

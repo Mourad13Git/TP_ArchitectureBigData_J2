@@ -25,9 +25,32 @@ mongodb:
   state_collection: "ingestion_state"
   finale_collection: "enterprise_finale"
   silver_collection: "enterprise_silver"
+  gold_collection: "hotel_gold"
+  officers_collection: "enterprise_officers"
+  statuts_collection: "enterprise_statuts"
 
 silver:
   batch_size: 5_000
+
+gold:
+  batch_size: 500
+  nbb_bronze_subdir: "nbb/csvs"
+  samples_nbb_dir: "samples/nbb_csvs"
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  cors_origins:
+    - "http://localhost:5173"
+    - "http://127.0.0.1:5173"
+
+kbopub:
+  base_url: "https://kbopub.economie.fgov.be/kbopub/toonondernemingps.html"
+
+statuts:
+  base_url: "https://statuts.notaire.be/stapor_v1/enterprise/{bce}/statutes"
+  # Proxies Tor optionnels (cluster) — vide en local
+  tor_proxies: []
 
 hotellerie:
   nace_codes:
@@ -78,9 +101,6 @@ nbb:
 
 ejustice:
   base_url: "https://www.ejustice.just.fgov.be/cgi_tsv/list.pl"
-
-statuts:
-  base_url: "https://statuts.notaire.be/stapor_v1/enterprise/{bce}/statutes"
 
 ingestion:
   # Mettre 0 pour ingestion complète (~2M entreprises)
