@@ -4,6 +4,9 @@ export interface SearchHit {
   enterprise_number: string;
   name: string;
   status?: string;
+  has_gold?: boolean;
+  latest_ca?: number | null;
+  years_count?: number;
 }
 
 interface AppState {

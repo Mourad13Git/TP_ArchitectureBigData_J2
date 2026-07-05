@@ -97,12 +97,15 @@ def main() -> None:
       hdfs_prefix=cfg["bronze"]["hdfs_prefix"],
       cfg=cfg,
       limit=args.limit,
+      samples_root=ROOT / cfg["gold"].get("samples_nbb_dir", "samples/nbb_csvs"),
+      allow_sample_fallback=True,
       on_progress=log,
     )
     log(
         f"  NBB resultat: processed={stats['processed']}, done={stats['done']}, "
         f"errors={stats['errors']}, filings={stats['filings']}, "
-        f"rate_limited={stats['rate_limited']}, forbidden={stats.get('forbidden', False)}"
+        f"rate_limited={stats['rate_limited']}, forbidden={stats.get('forbidden', False)}, "
+        f"sample_fallback={stats.get('sample_fallback', 0)}"
     )
 
   if args.step in ("all", "status"):

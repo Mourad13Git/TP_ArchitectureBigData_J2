@@ -42,3 +42,13 @@ def get_officers_col():
 def get_statuts_col():
     cfg = get_cfg()
     return get_db()[cfg["mongodb"]["statuts_collection"]]
+
+
+def get_ejustice_col():
+    cfg = get_cfg()
+    return get_db()[cfg["mongodb"]["ejustice_collection"]]
+
+
+def get_contacts_col():
+    cfg = get_cfg()
+    return get_db()[cfg["mongodb"]["contacts_collection"]]

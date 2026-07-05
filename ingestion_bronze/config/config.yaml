@@ -28,6 +28,8 @@ mongodb:
   gold_collection: "hotel_gold"
   officers_collection: "enterprise_officers"
   statuts_collection: "enterprise_statuts"
+  ejustice_collection: "enterprise_ejustice"
+  contacts_collection: "enterprise_contacts"
 
 silver:
   batch_size: 5_000
@@ -101,6 +103,8 @@ nbb:
 
 ejustice:
   base_url: "https://www.ejustice.just.fgov.be/cgi_tsv/list.pl"
+  language: "fr"
+  max_pages: 2
 
 ingestion:
   # Mettre 0 pour ingestion complète (~2M entreprises)

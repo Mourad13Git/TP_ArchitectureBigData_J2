@@ -4,7 +4,9 @@ from api.app.models.schemas import EnterpriseDetail
 from api.app.services.db import get_cfg, get_gold_repo, get_silver_col
 from api.app.services.kbopub import get_or_scrape_officers
 from api.app.services.sankey import build_sankey
-from api.app.services.db import get_officers_col
+from api.app.services.db import get_officers_col, get_ejustice_col, get_contacts_col
+from api.app.services.ejustice_scraper import ejustice_list_url, get_or_scrape_ejustice
+from api.app.services.contacts import get_enterprise_contacts
 
 router = APIRouter(prefix="/enterprise", tags=["enterprise"])
 
@@ -32,6 +34,8 @@ def get_enterprise(bce: str, year: int | None = None):
 
     cfg = get_cfg()
     dirs = get_or_scrape_officers(bce_fmt, get_officers_col(), cfg)
+    ejustice = get_or_scrape_ejustice(bce_fmt, get_ejustice_col(), cfg)
+    contacts = get_enterprise_contacts(bce_fmt, silver, get_contacts_col(), cfg)
 
     return EnterpriseDetail(
         enterprise_number=bce_fmt,
@@ -39,4 +43,7 @@ def get_enterprise(bce: str, year: int | None = None):
         gold=gold_doc,
         dirigeants=dirs,
         sankey=sankey,
+        ejustice_publications=ejustice,
+        ejustice_liste_url=ejustice_list_url(bce_fmt),
+        contacts=contacts,
     )

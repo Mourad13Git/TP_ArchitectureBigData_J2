@@ -15,6 +15,7 @@ PCMN_FIELDS = {
     "dettes_financieres": ["17", "43"],
     "fonds_propres": ["10", "11", "12", "13", "14", "15"],
     "capital_souscrit": ["100"],
+    "effectif_fte": ["9087"],
 }
 
 
@@ -69,6 +70,7 @@ def compute_ratios(fields: dict[str, float]) -> dict[str, float | None]:
     fp = fields.get("fonds_propres", 0.0)
     tres = fields.get("tresorerie", 0.0)
     dettes = fields.get("dettes_financieres", 0.0)
+    fte = fields.get("effectif_fte", 0.0)
 
     marge_brute = ca - achats + var_stocks
 
@@ -84,6 +86,7 @@ def compute_ratios(fields: dict[str, float]) -> dict[str, float | None]:
         "roe_pct": pct(rn, fp),
         "ratio_liquidite": ratio(tres, dettes),
         "taux_endettement_pct": pct(dettes, fp),
+        "ca_par_etp": ratio(ca, fte),
     }
 
 

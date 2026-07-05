@@ -6,15 +6,20 @@ export async function searchEnterprises(q: string) {
   return r.json();
 }
 
-export async function getEnterprise(bce: string, year?: number) {
+/** BCE sans points dans l'URL (evite les bugs de routage avec les dots). */
+export function bceToUrl(bce: string): string {
+  return bce.replace(/\./g, "");
+}
+
+export async function getEnterprise(bceUrl: string, year?: number) {
   const url = year
-    ? `${API}/enterprise/${bce}?year=${year}`
-    : `${API}/enterprise/${bce}`;
+    ? `${API}/enterprise/${bceUrl}?year=${year}`
+    : `${API}/enterprise/${bceUrl}`;
   const r = await fetch(url);
   if (!r.ok) throw new Error("Entreprise introuvable");
   return r.json();
 }
 
-export function statutsEventSource(bce: string): EventSource {
-  return new EventSource(`${API}/enterprise/${bce}/statuts/stream`);
+export function statutsEventSource(bceUrl: string): EventSource {
+  return new EventSource(`${API}/enterprise/${bceUrl}/statuts/stream`);
 }
